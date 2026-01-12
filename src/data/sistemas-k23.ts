@@ -158,7 +158,8 @@ export const PLAN_ESTUDIOS_INICIAL: Materia[] = [
     anio: 3,
     estado: 'pendiente',
     requerimientos: { 
-      paraCursar: { cursadas: ['analisis-sistemas', 'paradigmas'], finales: ['sistemas-organizaciones'] }, 
+      // Pide finales de las troncales de 1ero y cursadas de las de 2do
+      paraCursar: { cursadas: ['analisis-sistemas', 'paradigmas'], finales: ['sistemas-organizaciones', 'algoritmos'] }, 
       paraRendir: { finales: ['analisis-sistemas', 'paradigmas'] } 
     }
   },
@@ -168,7 +169,8 @@ export const PLAN_ESTUDIOS_INICIAL: Materia[] = [
     anio: 3,
     estado: 'pendiente',
     requerimientos: { 
-      paraCursar: { cursadas: ['arquitectura', 'fisica2', 'am2'], finales: [] }, 
+      // VALIDADO: Pide Final de Física 1 + Cursada de Física 2 y Arqui
+      paraCursar: { cursadas: ['arquitectura', 'fisica2', 'am2'], finales: ['fisica1'] }, 
       paraRendir: { finales: ['arquitectura', 'fisica2', 'am2'] } 
     }
   },
@@ -219,7 +221,6 @@ export const PLAN_ESTUDIOS_INICIAL: Materia[] = [
     anio: 3,
     estado: 'pendiente',
     requerimientos: { 
-      // Req. genérico: Alguna materia fuerte de 2do
       paraCursar: { cursadas: ['paradigmas', 'analisis-sistemas'], finales: [] }, 
       paraRendir: { finales: [] } 
     }
@@ -252,6 +253,7 @@ export const PLAN_ESTUDIOS_INICIAL: Materia[] = [
     anio: 4,
     estado: 'pendiente',
     requerimientos: { 
+      // VALIDADO: Pide Final de AM2 + Cursada de Probabilidad y Numérico
       paraCursar: { cursadas: ['probabilidad', 'analisis-numerico'], finales: ['am2'] }, 
       paraRendir: { finales: ['probabilidad', 'analisis-numerico'] } 
     }
