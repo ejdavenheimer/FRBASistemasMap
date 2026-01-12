@@ -1,0 +1,31 @@
+/* src/index.css */
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  
+  /* Esquema de colores base (Light Mode por defecto) */
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center; /* Centra todo, quizás quieras quitar esto luego */
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+/* Reset básico para que los inputs y botones no se vean feos */
+button, input, select {
+  font-family: inherit;
+  font-size: 100%;
+}
+
+/* Regla de oro para maquetar sin sufrir */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
