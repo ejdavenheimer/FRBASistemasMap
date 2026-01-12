@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { Handle, Position, NodeToolbar } from 'reactflow';
 import type { NodeProps } from 'reactflow';
 import { useMateriasStore } from '../../store/useMateriasStore';
