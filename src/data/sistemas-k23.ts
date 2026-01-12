@@ -26,7 +26,7 @@ export const PLAN_ESTUDIOS_INICIAL: Materia[] = [
   { id: 'economia', nombre: 'Economía', anio: 3, estado: 'pendiente', requerimientos: { paraCursar: { cursadas: ['analisis-sistemas'], finales: ['am1', 'aga'] }, paraRendir: { finales: [] } } },
   { id: 'bases-datos', nombre: 'Bases de Datos', anio: 3, estado: 'pendiente', requerimientos: { paraCursar: { cursadas: ['sintaxis', 'analisis-sistemas'], finales: ['algoritmos', 'logica'] }, paraRendir: { finales: [] } } },
   { id: 'desarrollo-sw', nombre: 'Desarrollo de Software', anio: 3, estado: 'pendiente', requerimientos: { paraCursar: { cursadas: ['paradigmas', 'analisis-sistemas'], finales: ['algoritmos', 'logica'] }, paraRendir: { finales: [] } } },
-  { id: 'comunicaciones', nombre: 'Comunicación de Datos', anio: 3, estado: 'pendiente', requerimientos: { paraCursar: { cursadas: ['fisica2', 'so'], finales: ['fisica1', 'arquitectura'] }, paraRendir: { finales: [] } } },
+  { id: 'comunicaciones', nombre: 'Comunicación de Datos', anio: 3, estado: 'pendiente', requerimientos: { paraCursar: { cursadas: [], finales: ['fisica1', 'arquitectura'] }, paraRendir: { finales: [] } } },
   { id: 'analisis-numerico', nombre: 'Análisis Numérico', anio: 3, estado: 'pendiente', requerimientos: { paraCursar: { cursadas: ['am2', 'algoritmos'], finales: ['am1', 'aga'] }, paraRendir: { finales: [] } } },
   { id: 'diseno-sistemas', nombre: 'Diseño de Sistemas de Información', anio: 3, estado: 'pendiente', requerimientos: { paraCursar: { cursadas: ['paradigmas', 'analisis-sistemas'], finales: ['sistemas-organizaciones', 'algoritmos'] }, paraRendir: { finales: [] } } },
   { id: 'electiva-3-1', nombre: 'Electiva I (3º Año)', anio: 3, estado: 'pendiente', requerimientos: { paraCursar: { cursadas: ['paradigmas', 'analisis-sistemas'], finales: [] }, paraRendir: { finales: [] } } },
@@ -34,7 +34,7 @@ export const PLAN_ESTUDIOS_INICIAL: Materia[] = [
   // --- CUARTO AÑO ---
   { id: 'legislacion', nombre: 'Legislación', anio: 4, estado: 'pendiente', requerimientos: { paraCursar: { cursadas: ['ing-sociedad'], finales: ['ingles1'] }, paraRendir: { finales: [] } } },
   { id: 'ing-calidad-sw', nombre: 'Ingeniería y Calidad de Software', anio: 4, estado: 'pendiente', requerimientos: { paraCursar: { cursadas: ['bases-datos', 'desarrollo-sw', 'diseno-sistemas'], finales: ['sintaxis', 'paradigmas'] }, paraRendir: { finales: [] } } },
-  { id: 'redes', nombre: 'Redes de Datos', anio: 4, estado: 'pendiente', requerimientos: { paraCursar: { cursadas: ['comunicaciones'], finales: ['so'] }, paraRendir: { finales: [] } } },
+  { id: 'redes', nombre: 'Redes de Datos', anio: 4, estado: 'pendiente', requerimientos: { paraCursar: { cursadas: ['comunicaciones', 'so'], finales: [] }, paraRendir: { finales: [] } } },
   { id: 'operativa', nombre: 'Investigación Operativa', anio: 4, estado: 'pendiente', requerimientos: { paraCursar: { cursadas: ['probabilidad', 'analisis-numerico'], finales: ['am2'] }, paraRendir: { finales: [] } } },
   { id: 'simulacion', nombre: 'Simulación', anio: 4, estado: 'pendiente', requerimientos: { paraCursar: { cursadas: ['probabilidad'], finales: ['am2'] }, paraRendir: { finales: [] } } },
   { id: 'automatizacion', nombre: 'Tecnologías para la Automatización', anio: 4, estado: 'pendiente', requerimientos: { paraCursar: { cursadas: ['fisica2', 'analisis-numerico'], finales: [] }, paraRendir: { finales: [] } } },
