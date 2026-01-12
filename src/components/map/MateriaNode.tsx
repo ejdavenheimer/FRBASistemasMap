@@ -1,16 +1,16 @@
 import { memo } from 'react';
 import { Handle, Position, NodeToolbar } from 'reactflow';
-import type { NodeProps } from 'reactflow';
 import { useMateriasStore } from '../../store/useMateriasStore';
-import type { EstadoMateria } from '../../types';
 
+// Definimos la interfaz de las props que recibe el nodo
 export interface MateriaNodeData {
   label: string;
-  estado: EstadoMateria;
-  nota?: number; // Recibimos la nota
+  estado: 'pendiente' | 'cursando' | 'regularizada' | 'aprobada';
+  nota?: number;
   habilitada: boolean;
-  inputsCount: number; 
-  isSelected: boolean; 
+  inputsCount: number;
+  isSelected: boolean;
+  toggleMenu: () => void; 
   styleInfo: {
     background: string;
     color: string;
@@ -18,115 +18,141 @@ export interface MateriaNodeData {
     opacity: number;
     filter: string;
     zIndex: number;
-    width: number | string;
+    width: number;
   };
 }
 
-const MateriaNode = ({ id, data, isConnectable }: NodeProps<MateriaNodeData>) => {
-  const { label, inputsCount, styleInfo, isSelected, estado, nota } = data;
+const MateriaNode = ({ id, data }: { id: string, data: MateriaNodeData }) => {
   const { cambiarEstado, cambiarNota } = useMateriasStore();
-
-  // Generación de handles (igual que siempre)
-  const targetHandles = [];
-  const count = inputsCount || 1;
-  for (let i = 0; i < count; i++) {
-    const topPosition = (100 / (count + 1)) * (i + 1);
-    targetHandles.push(
-      <Handle
-        key={`target-${i}`} type="target" position={Position.Left} id={`target-${i}`}
-        style={{ top: `${topPosition}%`, background: '#555', width: '8px', height: '8px', border: '2px solid #222', zIndex: 10 }}
-        isConnectable={isConnectable}
-      />
-    );
-  }
-
-  const BotonEstado = ({ st, color, title }: { st: EstadoMateria, color: string, title: string }) => (
-    <button
-      onClick={(e) => { e.stopPropagation(); cambiarEstado(id, st); }}
-      title={title}
-      style={{
-        background: color,
-        width: '28px', height: '28px',
-        borderRadius: '50%',
-        border: estado === st ? '3px solid white' : '1px solid #555',
-        cursor: 'pointer',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: '10px', fontWeight: 'bold', color: '#333'
-      }}
-    >
-      {estado === st && '✓'}
-    </button>
-  );
+  
+  const inputsArray = Array.from({ length: data.inputsCount || 1 });
 
   return (
-    <div style={{ position: 'relative' }}>
-      
-      {/* TOOLBAR: Aparece al seleccionar */}
-      <NodeToolbar isVisible={isSelected} position={Position.Top} align="center" offset={10}>
-        <div style={{ 
-            display: 'flex', gap: '8px', background: '#222', padding: '8px', 
-            borderRadius: '12px', border: '1px solid #666',
-            boxShadow: '0 5px 15px rgba(0,0,0,0.5)', alignItems: 'center'
-        }}>
-            <BotonEstado st="pendiente" color="#f3f4f6" title="Pendiente" />
-            <BotonEstado st="cursando" color="#3b82f6" title="Cursando" />
-            <BotonEstado st="regularizada" color="#f59e0b" title="Regularizada" />
-            <BotonEstado st="aprobada" color="#10b981" title="Aprobada" />
-
-            {/* INPUT DE NOTA: Solo si está aprobada */}
-            {estado === 'aprobada' && (
-              <div style={{ marginLeft: '5px', borderLeft: '1px solid #555', paddingLeft: '8px', display: 'flex', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', color: '#aaa', marginRight: '4px' }}>Nota:</span>
-                <input 
-                  type="number" 
-                  min="4" max="10" 
-                  value={nota || ''}
-                  onChange={(e) => cambiarNota(id, parseInt(e.target.value))}
-                  onClick={(e) => e.stopPropagation()} // Para que no seleccione/deseleccione al escribir
-                  style={{
-                    width: '40px', padding: '4px', borderRadius: '4px', border: '1px solid #555',
-                    background: '#333', color: 'white', textAlign: 'center'
-                  }}
-                />
-              </div>
-            )}
-        </div>
-      </NodeToolbar>
-
-      {targetHandles}
-
-      {/* CAJA DE LA MATERIA */}
-      <div
+    <div style={{
+        padding: '10px',
+        borderRadius: '8px',
+        fontSize: '12px',
+        fontWeight: 'bold',
+        textAlign: 'center',
+        cursor: 'pointer',
+        boxShadow: data.isSelected ? '0 0 15px rgba(0,0,0,0.5)' : 'none',
+        transition: 'all 0.3s ease',
+        ...data.styleInfo
+    }}>
+      {/* BARRA DE HERRAMIENTAS FLOTANTE (MENÚ) */}
+      <NodeToolbar 
+        isVisible={data.isSelected} 
+        position={Position.Top} 
+        offset={10}
         style={{
-          background: styleInfo.background,
-          color: styleInfo.color,
-          border: styleInfo.border,
-          width: styleInfo.width,
-          minHeight: '60px',
-          height: 'auto',
-          whiteSpace: 'normal',
-          lineHeight: '1.3',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center',
-          borderRadius: '8px', padding: '12px 15px', fontSize: '13px',
-          opacity: styleInfo.opacity, filter: styleInfo.filter, transition: 'all 0.3s ease',
-          boxShadow: isSelected ? '0 0 0 3px rgba(255, 255, 255, 0.3)' : 'none',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            background: '#1f2937',
+            padding: '12px',
+            borderRadius: '8px',
+            border: '1px solid #374151',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+            minWidth: '180px',
+            color: 'white'
         }}
       >
-        <div>{label}</div>
-        {/* Mostrar nota pequeña en la caja si existe */}
-        {estado === 'aprobada' && nota && (
-          <div style={{ marginTop: '4px', fontSize: '11px', background: 'rgba(0,0,0,0.2)', padding: '2px 6px', borderRadius: '4px' }}>
-            Nota: <strong>{nota}</strong>
-          </div>
+        {/* Cabecera con Botón CERRAR (X) */}
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #374151', paddingBottom: '8px', marginBottom: '4px'}}>
+            <span style={{fontSize: '11px', color: '#9ca3af', textTransform: 'uppercase'}}>Editar Estado</span>
+            <button 
+                onClick={(e) => {
+                    e.stopPropagation(); 
+                    data.toggleMenu();
+                }}
+                style={{
+                    background: 'transparent', border: 'none', color: '#9ca3af', 
+                    cursor: 'pointer', fontSize: '14px', fontWeight: 'bold', padding: '0 4px'
+                }}
+            >
+                ✕
+            </button>
+        </div>
+
+        {/* Botones de Estado - CORREGIDOS (Sin prop border duplicada) */}
+        <div style={{display: 'flex', gap: '5px', flexWrap: 'wrap'}}>
+            <button onClick={() => cambiarEstado(id, 'pendiente')} 
+                style={{
+                    flex: 1, padding: '6px', fontSize: '10px', background: '#374151', 
+                    border: 'none', // Pendiente no lleva borde condicional
+                    borderRadius: '4px', color: 'white', cursor: 'pointer', 
+                    opacity: data.estado === 'pendiente' ? 1 : 0.6
+                }}>
+                Pendiente
+            </button>
+            <button onClick={() => cambiarEstado(id, 'cursando')} 
+                style={{
+                    flex: 1, padding: '6px', fontSize: '10px', background: '#3b82f6', 
+                    borderRadius: '4px', color: 'white', cursor: 'pointer', 
+                    border: data.estado === 'cursando' ? '2px solid white' : 'none' // Solo dejamos esta
+                }}>
+                Cursando
+            </button>
+        </div>
+        <div style={{display: 'flex', gap: '5px'}}>
+            <button onClick={() => cambiarEstado(id, 'regularizada')} 
+                style={{
+                    flex: 1, padding: '6px', fontSize: '10px', background: '#f59e0b', 
+                    borderRadius: '4px', color: 'white', cursor: 'pointer', 
+                    border: data.estado === 'regularizada' ? '2px solid white' : 'none' // Solo dejamos esta
+                }}>
+                Regular
+            </button>
+            <button onClick={() => cambiarEstado(id, 'aprobada')} 
+                style={{
+                    flex: 1, padding: '6px', fontSize: '10px', background: '#10b981', 
+                    borderRadius: '4px', color: 'white', cursor: 'pointer', 
+                    border: data.estado === 'aprobada' ? '2px solid white' : 'none' // Solo dejamos esta
+                }}>
+                Aprobada
+            </button>
+        </div>
+
+        {/* Selector de Nota */}
+        {data.estado === 'aprobada' && (
+            <div style={{marginTop: '5px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#111', padding: '5px', borderRadius: '4px'}}>
+                <span style={{fontSize: '11px', color: '#ccc'}}>Nota:</span>
+                <input 
+                    type="number" 
+                    min="4" max="10" 
+                    value={data.nota || ''} 
+                    onChange={(e) => cambiarNota(id, parseInt(e.target.value))}
+                    placeholder="-"
+                    style={{width: '40px', background: '#333', border: 'none', color: 'white', textAlign: 'center', borderRadius: '3px', fontSize: '12px'}}
+                />
+            </div>
+        )}
+      </NodeToolbar>
+
+      {/* PUERTOS DE CONEXIÓN */}
+      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+        {inputsArray.map((_, index) => (
+            <Handle
+                key={`target-${index}`}
+                type="target"
+                position={Position.Left}
+                id={`target-${index}`}
+                style={{ 
+                    top: `${((index + 1) / (inputsArray.length + 1)) * 100}%`,
+                    background: 'transparent', border: 'none' 
+                }}
+            />
+        ))}
+      </div>
+      <Handle type="source" position={Position.Right} id="source-right" style={{ background: 'transparent', border: 'none' }} />
+
+      {/* CONTENIDO DEL NODO */}
+      <div>
+        <div style={{ marginBottom: '4px' }}>{data.label}</div>
+        {data.nota && data.nota > 0 && data.estado === 'aprobada' && (
+            <div style={{ fontSize: '10px', color: '#fb923c', marginTop: '2px' }}>Nota: {data.nota}</div>
         )}
       </div>
-
-      <Handle
-        type="source" position={Position.Right} id="source-right"
-        style={{ background: '#555', width: '8px', height: '8px', border: '2px solid #222', zIndex: 10 }}
-        isConnectable={isConnectable}
-      />
     </div>
   );
 };

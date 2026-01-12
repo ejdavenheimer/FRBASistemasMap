@@ -16,7 +16,7 @@ import { puedeCursar, getColorNodo } from './lib/validaciones';
 import MateriaNode from './components/map/MateriaNode';
 import type { MateriaNodeData } from './components/map/MateriaNode';
 
-// --- CONFIGURACIÓN DE LAYOUT ---
+// --- CONFIGURACIÓN ---
 const ANCHO_COLUMNA = 250; 
 const SEPARACION_VERTICAL = 130;
 
@@ -33,7 +33,6 @@ const MATERIAS_TRONCALES = [
 ];
 
 function App() {
-  // Store con persistencia y simulación
   const { 
     materias, 
     isSimulationMode, 
@@ -57,13 +56,13 @@ function App() {
     return { total, aprobadas, porcentaje, promedio };
   }, [materias]);
 
-  // --- GENERACIÓN DINÁMICA DE NODOS Y ARISTAS ---
+  // --- NODOS Y ARISTAS ---
   const { nodes, edges } = useMemo(() => {
     const generatedNodes: Node<MateriaNodeData>[] = [];
     const generatedEdges: Edge[] = [];
     const posicionesY: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
 
-    // 1. Mapa de puertos (handles)
+    // 1. Inputs
     const inputsCountMap: Record<string, number> = {};
     materias.forEach(m => {
         m.requerimientos.paraCursar.cursadas.forEach(() => { inputsCountMap[m.id] = (inputsCountMap[m.id] || 0) + 1; });
@@ -74,7 +73,7 @@ function App() {
     const connectedNodeIds = new Set<string>();
     const connectedEdgeIds = new Set<string>();
     
-    // 2. Lógica de resaltado (Focus)
+    // 2. Selección y Dimming
     if (selectedNodeId) {
       connectedNodeIds.add(selectedNodeId);
       materias.forEach((m) => {
@@ -100,7 +99,7 @@ function App() {
       });
     }
 
-    // 3. Ordenar materias por importancia
+    // 3. Orden
     const materiasOrdenadas = [...materias].sort((a, b) => {
       const aEsTroncal = MATERIAS_TRONCALES.includes(a.id);
       const bEsTroncal = MATERIAS_TRONCALES.includes(b.id);
@@ -109,7 +108,7 @@ function App() {
       return 0;
     });
 
-    // 4. Construir Nodos
+    // 4. Crear Nodos
     materiasOrdenadas.forEach((materia) => {
       const habilitada = puedeCursar(materia, materias);
       const posX = (materia.anio - 1) * ANCHO_COLUMNA;
@@ -144,7 +143,9 @@ function App() {
             nota: materia.nota,
             habilitada,
             inputsCount: inputsCountMap[materia.id] || 0,
-            isSelected, 
+            isSelected,
+            // NUEVO: Pasamos la función para cerrar el menú desde el nodo
+            toggleMenu: () => setSelectedNodeId(prev => prev === materia.id ? null : materia.id),
             styleInfo: {
                 background: getColorNodo(materia, habilitada),
                 color: (materia.estado === 'aprobada' || !habilitada) ? '#eee' : '#111',
@@ -158,29 +159,36 @@ function App() {
         style: { zIndex },
       });
 
-      // 5. Construir Aristas
+      // 5. Crear Aristas (Flechas)
       const crearFlecha = (reqId: string, tipo: 'cursada' | 'final') => {
         const edgeId = `e-${tipo}-${reqId}-${materia.id}`;
         const isEdgeConnected = connectedEdgeIds.has(edgeId);
+        
         const targetInputCount = inputsCountMap[materia.id] || 1;
         const currentIndex = currentInputIndexMap[materia.id] || 0;
         const targetHandleId = `target-${currentIndex}`;
         currentInputIndexMap[materia.id] = (currentIndex + 1) % targetInputCount;
         
-        let stroke = tipo === 'final' ? '#7f1d1d' : '#444';
+        // --- AQUÍ EL CAMBIO VISUAL ---
+        // Por defecto: Gris neutro (#444) para que no parezca error.
+        let stroke = '#444'; 
         let strokeWidth = 1;
-        let edgeZIndex = tipo === 'final' ? 2 : 1;
+        let edgeZIndex = 1;
         let animated = false;
-        const strokeDasharray = tipo === 'final' ? '6,4' : '0';
+        
+        // Finales punteados, Cursadas continuas
+        const strokeDasharray = tipo === 'final' ? '5,5' : '0';
 
         if (dimMode) {
            if (isEdgeConnected) {
              strokeWidth = 2.5;
              animated = true;
              edgeZIndex = 10;
+             // SOLO COLOREAMOS AL INTERACTUAR
              const colorFlecha = tipo === 'final' ? '#ef4444' : '#fb923c';
              stroke = reqId === selectedNodeId ? '#3b82f6' : colorFlecha;
            } else {
+             // Lo no conectado se apaga casi por completo
              stroke = '#222';
              opacity: 0.1;
            }
@@ -217,12 +225,9 @@ function App() {
 
   return (
     <div style={{ 
-        width: '100vw', 
-        height: '100vh', 
-        background: '#121212',
+        width: '100vw', height: '100vh', background: '#121212',
         border: isSimulationMode ? '4px solid #3b82f6' : 'none',
-        boxSizing: 'border-box',
-        transition: 'border 0.3s ease'
+        boxSizing: 'border-box', transition: 'border 0.3s ease'
     }}>
       <ReactFlow
         nodes={nodes}
@@ -237,87 +242,49 @@ function App() {
         <Background color="#333" gap={25} size={1} variant={BackgroundVariant.Dots} />
         <Controls />
         
-        {/* PANEL DE HERRAMIENTAS (SIMULACIÓN / RESET) */}
+        {/* Paneles superiores (Simulación / Reset / Stats) */}
         <Panel position="top-left" style={{ display: 'flex', gap: '10px' }}>
-            <button 
-                onClick={toggleSimulationMode}
-                style={{
-                    padding: '10px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-                    fontWeight: 'bold', background: isSimulationMode ? '#ef4444' : '#3b82f6',
-                    color: 'white', boxShadow: '0 4px 10px rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', gap: '8px'
-                }}
-            >
-                {isSimulationMode ? '🛑 Salir de Simulación' : '🧪 Modo Simulación'}
+            <button onClick={toggleSimulationMode} style={{ padding: '10px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', background: isSimulationMode ? '#ef4444' : '#3b82f6', color: 'white', boxShadow: '0 4px 10px rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {isSimulationMode ? '🛑 Salir' : '🧪 Simular'}
             </button>
-
-            <button 
-                onClick={reiniciarProgreso}
-                style={{
-                    padding: '10px 16px', borderRadius: '8px', border: '1px solid #444',
-                    cursor: 'pointer', background: '#222', color: '#999', fontSize: '12px'
-                }}
-            >
+            <button onClick={reiniciarProgreso} style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid #444', cursor: 'pointer', background: '#222', color: '#999', fontSize: '12px' }}>
                 🗑️ Reset
             </button>
         </Panel>
 
-        {/* INDICADOR VISUAL DE SIMULACIÓN */}
         {isSimulationMode && (
-            <Panel position="top-center" style={{ 
-                background: '#3b82f6', color: 'white', padding: '6px 24px', 
-                borderRadius: '0 0 12px 12px', fontWeight: 'bold', fontSize: '14px',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.5)'
-            }}>
-                SIMULACIÓN ACTIVA: Los cambios se perderán al salir.
+            <Panel position="top-center" style={{ background: '#3b82f6', color: 'white', padding: '6px 24px', borderRadius: '0 0 12px 12px', fontWeight: 'bold', fontSize: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
+                MODO SIMULACIÓN
             </Panel>
         )}
 
-        {/* PANEL DE ESTADÍSTICAS */}
-        <Panel position="top-right" style={{
-            background: 'rgba(25,25,25,0.9)', padding: '15px', borderRadius: '12px',
-            color: '#eee', border: '1px solid #444', minWidth: '200px',
-            backdropFilter: 'blur(8px)'
-        }}>
-            <h3 style={{margin: '0 0 10px 0', fontSize:'15px', borderBottom:'1px solid #444', paddingBottom:'8px'}}>Estadísticas</h3>
-            <div style={{display:'flex', justifyContent:'space-between', marginBottom:'5px', fontSize:'13px'}}>
-                <span>Aprobadas:</span>
-                <strong style={{color:'#10b981'}}>{stats.aprobadas} / {stats.total}</strong>
-            </div>
-            <div style={{width:'100%', height:'6px', background:'#333', borderRadius:'3px', overflow:'hidden', marginBottom:'12px'}}>
+        <Panel position="top-right" style={{ background: 'rgba(25,25,25,0.9)', padding: '15px', borderRadius: '12px', color: '#eee', border: '1px solid #444', minWidth: '200px', backdropFilter: 'blur(8px)' }}>
+            <div style={{display:'flex', justifyContent:'space-between', fontSize:'13px', marginBottom:'5px'}}><span>Progreso:</span><strong style={{color:'#10b981'}}>{stats.aprobadas}/{stats.total}</strong></div>
+            <div style={{width:'100%', height:'6px', background:'#333', borderRadius:'3px', overflow:'hidden', marginBottom:'8px'}}>
                 <div style={{ width: `${stats.porcentaje}%`, height:'100%', background: '#10b981', transition: 'width 0.5s ease' }}></div>
             </div>
-            <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                <span style={{color:'#aaa', fontSize:'13px'}}>Promedio:</span>
-                <span style={{fontSize:'20px', fontWeight:'bold', color:'#fb923c'}}>{stats.promedio}</span>
-            </div>
+            <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}><span style={{color:'#aaa', fontSize:'13px'}}>Promedio:</span><span style={{fontSize:'20px', fontWeight:'bold', color:'#fb923c'}}>{stats.promedio}</span></div>
         </Panel>
 
-        {/* PANEL DE REFERENCIAS COLAPSABLE */}
+        {/* Panel Referencias */}
         <Panel position="bottom-left">
           {!leyendaAbierta ? (
-             <button onClick={() => setLeyendaAbierta(true)} style={{ background: 'rgba(40,40,40,0.9)', color: 'white', border: '1px solid #555', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '12px' }}>
-               ℹ️ Ver Referencias
-             </button>
+             <button onClick={() => setLeyendaAbierta(true)} style={{ background: 'rgba(40,40,40,0.9)', color: 'white', border: '1px solid #555', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '12px' }}>ℹ️ Referencias</button>
           ) : (
              <div style={{ background: 'rgba(20,20,20,0.95)', padding: '12px', borderRadius: '10px', color: '#eee', border: '1px solid #444', minWidth: '210px', fontSize: '12px' }}>
-                 <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'10px', borderBottom:'1px solid #444', paddingBottom:'5px'}}>
-                    <strong>Referencias</strong>
-                    <button onClick={() => setLeyendaAbierta(false)} style={{background:'none', border:'none', color:'#888', cursor:'pointer'}}>✕</button>
-                 </div>
+                 <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'10px', borderBottom:'1px solid #444', paddingBottom:'5px'}}><strong>Referencias</strong><button onClick={() => setLeyendaAbierta(false)} style={{background:'none', border:'none', color:'#888', cursor:'pointer'}}>✕</button></div>
                  <div style={{display:'flex', flexDirection:'column', gap:'6px'}}>
                     <div style={{display:'flex', gap:'8px', alignItems:'center'}}><div style={{width:10, height:10, background:'#f3f4f6', borderRadius:'50%'}}></div> Habilitada</div>
                     <div style={{display:'flex', gap:'8px', alignItems:'center'}}><div style={{width:10, height:10, background:'#3b82f6', borderRadius:'50%'}}></div> Cursando</div>
-                    <div style={{display:'flex', gap:'8px', alignItems:'center'}}><div style={{width:10, height:10, background:'#f59e0b', borderRadius:'50%'}}></div> Regularizada</div>
                     <div style={{display:'flex', gap:'8px', alignItems:'center'}}><div style={{width:10, height:10, background:'#10b981', borderRadius:'50%'}}></div> Aprobada</div>
                     <div style={{marginTop:'5px', borderTop:'1px solid #444', paddingTop:'8px'}}>
-                        <div style={{display:'flex', gap:'8px', alignItems:'center', marginBottom:'4px'}}><div style={{width:20, height:2, background:'#fb923c'}}></div> Req. Cursada</div>
+                        <div style={{display:'flex', gap:'8px', alignItems:'center'}}><div style={{width:20, height:2, background:'#fb923c'}}></div> Req. Cursada</div>
                         <div style={{display:'flex', gap:'8px', alignItems:'center'}}><div style={{width:20, height:0, borderTop:'2px dashed #ef4444'}}></div> Req. Final</div>
                     </div>
                  </div>
              </div>
           )}
         </Panel>
-
       </ReactFlow>
     </div>
   );
