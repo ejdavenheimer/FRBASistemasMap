@@ -1,0 +1,244 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: dark; 
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #121212;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+button, input, select {
+  font-family: inherit;
+  font-size: 100%;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* --- FIX CRÍTICO: BLOQUEAR INTERACCIÓN CON CABLES --- */
+.react-flow__edge-interaction {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+/* --- FIX INPUT NUMÉRICO: SACAR FLECHAS --- */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* --- TOOLBAR --- */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1f1f1f;
+  border-bottom: 1px solid #333;
+  padding: 0 20px;
+  width: 100%;
+  height: 60px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  z-index: 100;
+  position: relative;
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.plan-selector {
+  background: #2d2d2d;
+  color: #eee;
+  border: 1px solid #444;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+}
+
+.plan-selector option {
+  background-color: #1f1f1f;
+}
+
+/* --- BOTONES TOOLBAR --- */
+.btn-tool {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #2d2d2d;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.btn-tool:hover {
+  background: #3d3d3d;
+  color: white;
+}
+
+.btn-tool.active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.btn-reset:hover {
+  background: #7f1d1d;
+  border-color: #ef4444;
+  color: white;
+}
+
+/* --- ICONOS SOCIALES ANIMADOS --- */
+.social-icon {
+  color: #aaa;
+  margin-left: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+}
+
+.social-icon:hover {
+  color: #fff;
+  transform: scale(1.2) rotate(5deg);
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+}
+
+/* --- REFERENCIAS --- */
+.legend-panel {
+  background: rgba(30, 30, 30, 0.95);
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 12px;
+  color: #eee;
+  min-width: 180px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  animation: slideIn 0.2s ease-out;
+}
+
+.legend-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.line { width: 25px; height: 2px; }
+
+/* --- MODAL --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: #1f1f1f;
+  border: 1px solid #444;
+  padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  animation: fadeInScale 0.2s ease-out;
+}
+
+.modal-header {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  color: white;
+  border-bottom: 1px solid #333;
+  padding-bottom: 12px;
+}
+
+.modal-body {
+  font-size: 14px;
+  color: #ccc;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-modal {
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+}
+
+.btn-cancel {
+  background: transparent;
+  color: #aaa;
+  border: 1px solid #444;
+}
+
+.btn-cancel:hover {
+  background: #333;
+  color: white;
+}
+
+.btn-confirm {
+  background: #2563eb;
+  color: white;
+}
+
+.btn-confirm:hover {
+  background: #1d4ed8;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+}
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
